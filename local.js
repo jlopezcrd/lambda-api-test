@@ -24,31 +24,27 @@ const serverWrapper = http.createServer(function (request, response) {
     body: request.body,
   }
 
-  api.run(event, {})
-    .then((res) => {
-      let {
-        body,
-        headers,
-        statusCode,
-      } = res
+  api.run(event, {}, (err, res) => {
+    console.log(err);
+    console.log(res);
 
-      if (res.isBase64Encoded) {
-        body = Buffer.from(body, 'base64')
-      }
+    let {
+      body,
+      headers,
+      statusCode,
+    } = res
 
-      if (!headers['content-length'] && body) {
-        headers['content-length'] = body.length
-      }
+    if (res.isBase64Encoded) {
+      body = Buffer.from(body, 'base64')
+    }
 
-      response.writeHead(statusCode, headers)
-      response.end(body)
-    })
-    .catch((err) => {
-      console.error('Something went horribly, horribly wrong')
-      response.writeHead(500, { 'content-length': 0 })
-      response.end('')
-      throw err
-    })
+    if (!headers['content-length'] && body) {
+      headers['content-length'] = body.length
+    }
+
+    response.writeHead(statusCode, headers)
+    response.end(body)
+  })
 })
 
 serverWrapper.listen(process.env.PORT || 3000, () => {
